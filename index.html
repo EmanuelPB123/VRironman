@@ -1,341 +1,333 @@
 <html>
 
 <head>
-  <title></title>
-  <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-  <link rel="stylesheet" href="styles.css">
-  <script src="clima.js"></script>
-  <!-- Add OpenWeatherMap API -->
-  <script>
-    const WEATHER_API_KEY = 'YOUR_API_KEY'; // Replace with actual OpenWeatherMap API key
-  </script>
-  <script>
-    // Add new component before the existing ones
-    AFRAME.registerComponent('look-at-camera', {
-      init: function () {
-        this.isLookingAt = false;
-        const rotation = this.el.getAttribute('rotation');
-        // Store original rotation values individually
-        this.originalRotation = {
-          x: rotation.x || 0,
-          y: rotation.y || 0,
-          z: rotation.z || 0
-        };
-
-        this.el.addEventListener('mouseenter', () => {
-          this.isLookingAt = true;
-        });
-
-        this.el.addEventListener('mouseleave', () => {
-          this.isLookingAt = false;
-          // Return to original rotation smoothly
-          this.el.setAttribute('animation', {
-            property: 'rotation',
-            to: `${this.originalRotation.x} ${this.originalRotation.y} ${this.originalRotation.z}`,
-            dur: 0,
-            easing: 'easeOutQuad'
-          });
-        });
-      },
-      tick: function () {
-        if (this.isLookingAt) {
-          const camera = document.querySelector('[camera]');
-          this.el.object3D.lookAt(camera.object3D.position);
-        }
-      }
-    });
-
-    AFRAME.registerComponent('fps-counter', {
-      schema: {
-        interval: { type: 'number', default: 1000 }
-      },
-      init: function () {
-        this.fps = 0;
-        this.frames = 0;
-        this.lastTime = performance.now();
-
-        this.el.setAttribute('text', {
-          value: 'FPS: 0',
-          color: '#0ff',
-          align: 'center',
-          width: 2,
-          wrapCount: 20
-        });
-      },
-      tick: function () {
-        const now = performance.now();
-        this.frames++;
-
-        if (now - this.lastTime > this.data.interval) {
-          this.fps = Math.round((this.frames * 1000) / (now - this.lastTime));
-          this.el.setAttribute('text', { value: `FPS: ${this.fps}` });
-          this.lastTime = now;
-          this.frames = 0;
-        }
-      }
-    });
-
-    AFRAME.registerComponent('system-stats', {
-      init: function () {
-        this.el.setAttribute('text', {
-          value: 'System Stats: Loading...',
-          color: '#0ff',
-          align: 'center',
-          width: 2,
-          wrapCount: 20
-        });
-        this.updateStats();
-      },
-      updateStats: function () {
-        let statsText = 'System Stats:\n';
-
-        if (window.performance && window.performance.memory) {
-          const mem = Math.round(performance.memory.usedJSHeapSize / (1024 * 1024));
-          statsText += `Memory: ${mem}MB\n`;
-        } else {
-          statsText += 'Memory: N/A\n';
-        }
-
-        this.el.setAttribute('text', { value: statsText });
-        setTimeout(() => this.updateStats(), 1000);
-      }
-    });
-
-    AFRAME.registerComponent('date-time', {
-      init: function () {
-        this.el.setAttribute('text', {
-          value: 'Loading time...',
-          color: '#0ff',
-          align: 'center',
-          width: 2,
-          wrapCount: 20
-        });
-        this.updateDateTime();
-      },
-      updateDateTime: function () {
-        const now = new Date();
-        const text = `${now.toLocaleDateString()}\n${now.toLocaleTimeString()}`;
-        this.el.setAttribute('text', { value: text });
-        setTimeout(() => this.updateDateTime(), 1000);
-      }
-    });
-
-    // Funciones para manejar las ventanas emergentes
-    function openOverlay(overlayId) {
-      document.getElementById(overlayId).style.display = 'block';
-    }
-
-    function closeOverlay(overlayId) {
-      document.getElementById(overlayId).style.display = 'none';
-    }
-
-    // Hacer que los elementos con clase 'clickable' sean interactivos
-    AFRAME.registerComponent('clickable', {
-      init: function () {
-        let el = this.el;
-
-        el.addEventListener('mouseenter', function () {
-          el.setAttribute('scale', '1.1 1.1 1.1');
-        });
-
-        el.addEventListener('mouseleave', function () {
-          el.setAttribute('scale', '1 1 1');
-        });
-
-        el.addEventListener('click', function () {
-          let overlayId = el.getAttribute('data-overlay');
-          if (overlayId) {
-            openOverlay(overlayId);
-          }
-        });
-      }
-    });
-
-    // Verificar que todo esté cargado antes de inicializar
-    document.addEventListener('DOMContentLoaded', function () {
-      // Añadir componente clickable a todos los elementos necesarios
-      document.querySelectorAll('.clickable').forEach(el => {
-        if (!el.hasAttribute('clickable')) {
-          el.setAttribute('clickable', '');
-        }
-      });
-    });
-  </script>
-
+    <title>VR Chalet Huergo Official</title>
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/nipplejs/0.10.1/nipplejs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="js/environment.js"></script>
+    <!--     <script src="js/light.js"></script> -->
+    <script src="js/linterna.js"></script>
+    <script src="clima.js"></script>
+    <script src="script.js"></script>
+    <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
+    <!--     <div id="movement-controls"></div> -->
 
-  <div id="radioOverlay" class="web-overlay">
-    <button class="close-button" onclick="closeOverlay('radioOverlay')">X</button>
-    <iframe src="https://radio.garden/visit/comodoro-rivadavia/gKayohHw"></iframe>
-  </div>
-  <div id="youtubeOverlay" class="web-overlay">
-    <button class="close-button" onclick="closeOverlay('youtubeOverlay')">X</button>
-    <iframe src="https://www.youtube.com/" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
-  </div>
-  <div id="googleOverlay" class="web-overlay">
-    <button class="close-button" onclick="closeOverlay('googleOverlay')">X</button>
-    <iframe src="https://www.google.com/search?igu=1"></iframe>
-  </div>
+    <div id="radioOverlay" class="web-overlay">
+        <button class="close-button" onclick="closeOverlay('radioOverlay')">X</button>
+        <iframe src="https://radio.garden/visit/comodoro-rivadavia/gKayohHw"></iframe>
+    </div>
+    <div id="youtubeOverlay" class="web-overlay">
+        <button class="close-button" onclick="closeOverlay('youtubeOverlay')">X</button>
+        <iframe src="https://www.youtube.com/"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+    </div>
+    <div id="googleOverlay" class="web-overlay">
+        <button class="close-button" onclick="closeOverlay('googleOverlay')">X</button>
+        <iframe src="https://www.google.com/search?igu=1"></iframe>
+    </div>
 
-  <a-scene background="color: #2e2e2e">
-    <!-- Add cursor for interaction -->
-    <a-entity position="0 1.6 0">
-      <a-camera>
-        <a-cursor color="#ff1e00" fuse="true" fuseTimeout="1500"></a-cursor>
-      </a-camera>
-    </a-entity>
-
-    <!-- Enhanced Lighting with new colors -->
-    <a-entity light="type: ambient; color: #e8f4ff; intensity: 0.3"></a-entity>
-    <a-entity light="type: directional; color: #FFF; intensity: 0.8" position="-1 1 2"></a-entity>
-    <a-entity light="type: point; color: #e8f4ff; intensity: 0.6" position="0 4 0"></a-entity>
-    <a-entity light="type: spot; color: #e8f4ff; intensity: 0.5; angle: 45" position="0 5 0"
-      rotation="-90 0 0"></a-entity>
-
-    <!-- Enhanced Floor with new colors -->
-    <a-grid material="color: #8f8f8f; opacity: 0.2" rotation="-90 0 0" position="0 0 0" width="20" height="20"></a-grid>
-    <!--  <a-circle color="#FFD700" opacity="0.1" radius="10" rotation="-90 0 0" position="0 0.01 0" animation="property: opacity; from: 0.1; to: 0.3; dur: 2000; dir: alternate; loop: true"></a-circle> -->
-    <a-circle color="#8f8f8f" opacity="0.2" radius="10" rotation="-90 0 0" position="0 0.01 0"></a-circle>
+    <!-- Audio elements for collision sounds -->
+    <audio id="collision-sound-1" src="https://cdn.freesound.org/previews/417/417089_5121236-lq.mp3"></audio>
+    <audio id="collision-sound-2" src="https://cdn.freesound.org/previews/448/448084_6142149-lq.mp3"></audio>
+    <audio id="collision-sound-3" src="https://cdn.freesound.org/previews/411/411642_5121236-lq.mp3"></audio>
 
 
-    <!-- Enhanced Screen Displays -->
-    <!-- 1 -->
-    <a-entity position="-8 3 -6" rotation="0 90 0" look-at-camera>
-      <a-plane width="2" height="4" material="color: #0563f0; opacity: 0.2; metalness: 1; roughness: 0.2">
-        <a-entity position="0 0 0.01" fps-counter></a-entity>
-        <a-box width="2" height="0.1" depth="0.05" position="0 2 0"
-          material="color: #858585; metalness: 0.8; roughness: 0.2"></a-box>
-        <a-box width="2" height="0.1" depth="0.05" position="0 -2 0"
-          material="color: #858585; metalness: 0.8; roughness: 0.2"></a-box>
-      </a-plane>
-    </a-entity>
-    <!-- 2 -->
-    <a-entity position="-8 3 -3" rotation="0 90 0" look-at-camera>
-      <a-plane width="2" height="4" material="color: #0563f0; opacity: 0.2; metalness: 1; roughness: 0.2">
-        <a-entity position="0 0 0.01" system-stats></a-entity>
-        <a-box width="2" height="0.1" depth="0.05" position="0 2 0"
-          material="color: #858585; metalness: 0.8; roughness: 0.2"></a-box>
-        <a-box width="2" height="0.1" depth="0.05" position="0 -2 0"
-          material="color: #858585; metalness: 0.8; roughness: 0.2"></a-box>
-      </a-plane>
-    </a-entity>
-    <!-- 3 -->
-    <a-entity position="-8 3 0" rotation="0 90 0" look-at-camera>
-      <a-plane width="2" height="4" material="color: #0563f0; opacity: 0.2; metalness: 1; roughness: 0.2">
-        <a-entity position="0 0 0.01" date-time></a-entity>
-        <a-box width="2" height="0.1" depth="0.05" position="0 2 0"
-          material="color: #858585; metalness: 0.8; roughness: 0.2"></a-box>
-        <a-box width="2" height="0.1" depth="0.05" position="0 -2 0"
-          material="color: #858585; metalness: 0.8; roughness: 0.2"></a-box>
-      </a-plane>
-    </a-entity>
+    <a-scene>
 
-    <!-- 4 -->
-    <a-entity position="-8 3 3" rotation="0 90 0" look-at-camera>
-      <a-plane width="2" height="4" material="color: #0563f0; opacity: 0.2; metalness: 1; roughness: 0.2">
-        <a-entity position="0 0 0.01" text="value: Radio Garden; color: cyan; align: center; width: 2"></a-entity>
+        <!--     <a-assets>
+      <audio id="ambient-sound" src="sound/bosque-66633.mp3"></a-sound>
+    </a-assets> -->
+        <!-- Sonido de ambiente de fondo (por ejemplo, un zumbido eléctrico suave) -->
 
-        <!-- Botón Radio Garden -->
-        <a-entity position="0 -0.5 0.02" class="clickable" clickable data-overlay="radioOverlay">
-          <a-box color="#00AA55" width="1.5" height="0.3" depth="0.05" opacity="0.9">
-            <a-animation attribute="opacity" from="0.7" to="1" dur="1800" repeat="indefinite"></a-animation>
-          </a-box>
-          <a-text value="COMODORO RIVADAVIA" color="#ffffff" width="1.5" align="center" position="0 0 0.03"></a-text>
+        <!-- Enhanced Lighting with new colors -->
+        <!--     <a-entity light="type: ambient; color: #e8f4ff; intensity: 0.1"></a-entity> -->
+        <!--  <a-entity light="type: directional; color: #FFF; intensity: 0.1" position="0 1 0"></a-entity> -->
+        <!--  <a-entity light="type: point; color: #e8f4ff; intensity: 1" position="0 1 0"><a-sphere radius="0.1" color="#ffdb9d" material="emissive: #fff6dd; emissiveIntensity: 1.5"></a-sphere></a-entity> -->
+        <!--      <a-entity light="type: spot; color: #e8f4ff; intensity: 0.1; angle: 45" position="0 1 0"
+      rotation="-90 0 0"></a-entity> -->
+        <a-light type="spot" color="#ffdb9d" intensity="1" position="0 4.4 0" angle="180" penumbra="0.1" distance="25"
+            decay="1" cast-shadow="true" shadow="mapSize: 1024; bias: -0.0001; camera-near: 0.01; camera-far: 0.2">
+            <a-sphere radius="0.1" color="#ffdb9d" material="emissive: #fff6dd; emissiveIntensity: 1.5"></a-sphere>
+        </a-light>
+        <a-light type="spot" color="#ffdb9d" intensity="1" rotation="0 180 0" position="0 4.4 0" angle="180"
+            penumbra="0.1" distance="25" decay="1" cast-shadow="true"
+            shadow="mapSize: 1024; bias: -0.0001; camera-near: 0.01; camera-far: 0.2">
+            <a-sphere radius="0.1" color="#ffdb9d" material="emissive: #fff6dd; emissiveIntensity: 1.5"></a-sphere>
+        </a-light>
+
+
+        <!-- Cielo -->
+        <a-sky color="#000000"></a-sky>
+        <!-- <a-plane position="0 0 0" rotation="-90 0 0" width="2.5" height="2.4" material="color: #7BC8A4; roughness: 0.8; metalness: 0.2"></a-plane> -->
+
+        <!-- Enhanced Lighting with new colors -->
+        <!-- <a-entity light="type: ambient; color: #e8f4ff; intensity: 0.3"></a-entity> -->
+        <!-- <a-entity light="type: directional; color: #FFF; intensity: 0.8" position="-1 1 2"></a-entity> -->
+        <!-- <a-entity light="type: point; color: #e8f4ff; intensity: 0.1" position="0 4 0"></a-entity> -->
+        <!--         <a-entity light="type: spot; color: #e8f4ff; intensity: 0.5; angle: 45" position="0 5 0" rotation="-90 0 0"></a-entity> -->
+
+        <!-- Restricted zone markers -->
+        <!-- izq --><!-- <a-box position="-0.3 1.57 -0.99" width="0.002" height="0.02" depth="0.74"
+      material="color: #ff5500; opacity: 0.5; roughness: 0.7; metalness: 0.3"></a-box> -->
+        <!-- der --><!-- <a-box position="0.38 1.57 -0.99" width="0.002" height="0.02" depth="0.74"
+      material="color: #ff5500; opacity: 0.5; roughness: 0.7; metalness: 0.3"></a-box> -->
+        <!-- atras --><!-- <a-box position="0.04 1.57 -0.62" width="0.68" height="0.02" depth="0.002"
+      material="color: #ff5500; opacity: 0.5; roughness: 0.7; metalness: 0.3"></a-box> -->
+        <!-- adelante --><!-- <a-box position="0.04 1.57 -1.36" width="0.68" height="0.02" depth="0.002"
+      material="color: #ff5500; opacity: 0.5; roughness: 0.7; metalness: 0.3"></a-box> -->
+
+        <!-- Outer boundary walls -->
+        <!-- adelante --><!-- <a-box position="0 1.57 -2.1" width="4.18" height="0.5" depth="0.01"
+      material="color: #ff5500; opacity: 0.9; roughness: 0.1; metalness: 0.1"></a-box> -->
+        <!-- atras --><!-- <a-box position="0 1.57 1.2" width="4.18" height="0.5" depth="0.01"
+      material="color: #ff5500; opacity: 0.9; roughness: 0.1; metalness: 0.1"></a-box> -->
+        <!-- izq --><!-- <a-box position="-2.1 1.57 -0.45" width="0.01" height="0.5" depth="3.36"
+      material="color: #ff5500; opacity: 0.9; roughness: 0.1; metalness: 0.1"></a-box> -->
+        <!-- der --><!-- <a-box position="2 1.57 -0.45" width="0.01" height="0.5" depth="3.36"
+      material="color: #ff5500; opacity: 0.9; roughness: 0.1; metalness: 0.1"></a-box> -->
+
+        <!-- edificio -->
+        <a-entity position="-32 -2.9 -58" scale="1 1 1" gltf-model="untitled.glb" shadow="cast: true; receive: false">
         </a-entity>
 
-        <a-box width="2" height="0.1" depth="0.05" position="0 2 0"
-          material="color: #858585; metalness: 0.8; roughness: 0.2"></a-box>
-        <a-box width="2" height="0.1" depth="0.05" position="0 -2 0"
-          material="color: #858585; metalness: 0.8; roughness: 0.2"></a-box>
-      </a-plane>
-    </a-entity>
+        <!-- sound -->
+        <!--     <a-entity id="ambient-sound" position="0.1 1.55 -0"
+      sound="src: #ambient-sound; autoplay:true; loop: true; volume: 0.1; maxDistance: 10; refDistance: 1; rolloffFactor: 1">
+    </a-entity> -->
 
-    <!-- 5 -->
-    <a-entity position="-8 3 6" rotation="0 90 0" look-at-camera>
-      <a-plane width="2" height="4" material="color: #0563f0; opacity: 0.2; metalness: 1; roughness: 0.2">
-        <a-entity position="0 0 0.01" text="value: YouTube; color: cyan; align: center; width: 2"></a-entity>
-        
-        <!-- Botón YouTube -->
-        <a-entity position="0 -0.5 0.02" class="clickable" clickable data-overlay="youtubeOverlay">
-          <a-box color="#FF0000" width="1.5" height="0.3" depth="0.05" opacity="0.9">
-            <a-animation attribute="opacity" from="0.7" to="1" dur="1800" repeat="indefinite"></a-animation>
-          </a-box>
-          <a-text value="ABRIR YOUTUBE" color="#ffffff" width="1.5" align="center" position="0 0 0.03"></a-text>
+        <!-- <a-text value="Bienvenido al Chalet Huergo" position="-0.08 1.7 -0.08" color="#ffffff"
+      scale="0.06 0.06 0.06"></a-text>
+    <a-text value="SALIDA" position="0.02 1.7 -0.08" color="#ffffff" scale="0.06 0.06 0.06" rotation="0 180"></a-text>
+    <a-text value="Restricted Area" position="0.19 1.63 -0.62" color="#FF0000" scale="0.02 0.02 0.02"></a-text>
+ -->
+        <a-entity position="0 1.6 0">
+            <a-camera look-controls>
+                <a-cursor color="#ff1e00" fuse="true" fuseTimeout="1500"></a-cursor>
+                <!-- linterna -->
+                <!-- Cámara con linterna adjunta -->
+                <a-entity id="flashlight" light="type: spot; 
+        color: #fff; 
+        intensity: 0; 
+        angle: 90; 
+        penumbra: 0.2; 
+        decay: 1;
+        distance: 25;
+        castShadow: true;
+        shadowMapWidth: 1024;
+        shadowMapHeight: 1024" position="0 0 0" rotation="0 0 0">
+                </a-entity>
+
+                <!-- Modelo visual de la linterna (opcional) -->
+                <a-entity position="0.004 -0.006 -0.004" rotation="0 -20 0">
+                    <a-cylinder color="#333" height="0.002" radius="0.0004" position="0 0 0"></a-cylinder>
+                    <a-cylinder color="#555" height="0.0004" radius="0.0006" position="0 -0.0012 0"></a-cylinder>
+                </a-entity>
+            </a-camera>
         </a-entity>
-        
-        <a-box width="2" height="0.1" depth="0.05" position="0 2 0"
-          material="color: #858585; metalness: 0.8; roughness: 0.2"></a-box>
-        <a-box width="2" height="0.1" depth="0.05" position="0 -2 0"
-          material="color: #858585; metalness: 0.8; roughness: 0.2"></a-box>
-      </a-plane>
-    </a-entity>
 
-    <!-- 6 -->
-    <a-entity position="8 3 -6" rotation="0 -90 0" look-at-camera>
-      <a-plane width="2" height="4" material="color: #0563f0; opacity: 0.2; metalness: 1; roughness: 0.2">
-        <a-entity position="0 0 0.01" text="value: Google; color: cyan; align: center; width: 2"></a-entity>
+        <!-- Enhanced Screen Displays -->
+        <!-- 1 -->
+        <!-- Enhanced Screen Displays -->
+        <!-- 1 -->
+        <a-entity position="-8 3 -6" rotation="0 90 0" look-at-camera>
+            <a-plane width="2" height="4" material="color: #0563f0; opacity: 0.2; metalness: 1; roughness: 0.2">
+                <a-entity position="0 0 0.01" fps-counter></a-entity>
+                <a-box width="2" height="0.1" depth="0.05" position="0 2 0"
+                    material="color: #858585; metalness: 0.8; roughness: 0.2"></a-box>
+                <a-box width="2" height="0.1" depth="0.05" position="0 -2 0"
+                    material="color: #858585; metalness: 0.8; roughness: 0.2"></a-box>
+            </a-plane>
+        </a-entity>
+        <!-- 2 -->
+        <a-entity position="-8 3 -3" rotation="0 90 0" look-at-camera>
+            <a-plane width="2" height="4" material="color: #0563f0; opacity: 0.2; metalness: 1; roughness: 0.2">
+                <a-entity position="0 0 0.01" system-stats></a-entity>
+                <a-box width="2" height="0.1" depth="0.05" position="0 2 0"
+                    material="color: #858585; metalness: 0.8; roughness: 0.2"></a-box>
+                <a-box width="2" height="0.1" depth="0.05" position="0 -2 0"
+                    material="color: #858585; metalness: 0.8; roughness: 0.2"></a-box>
+            </a-plane>
+        </a-entity>
+        <!-- 3 -->
+        <a-entity position="-8 3 0" rotation="0 90 0" look-at-camera>
+            <a-plane width="2" height="4" material="color: #0563f0; opacity: 0.2; metalness: 1; roughness: 0.2">
+                <a-entity position="0 0 0.01" date-time></a-entity>
+                <a-box width="2" height="0.1" depth="0.05" position="0 2 0"
+                    material="color: #858585; metalness: 0.8; roughness: 0.2"></a-box>
+                <a-box width="2" height="0.1" depth="0.05" position="0 -2 0"
+                    material="color: #858585; metalness: 0.8; roughness: 0.2"></a-box>
+            </a-plane>
+        </a-entity>
+
+        <!-- 4 -->
+        <a-entity position="-8 3 3" rotation="0 90 0" look-at-camera>
+            <a-plane width="2" height="4" material="color: #0563f0; opacity: 0.2; metalness: 1; roughness: 0.2">
+                <a-entity position="0 0 0.01"
+                    text="value: Radio Garden; color: cyan; align: center; width: 2"></a-entity>
+
+                <!-- Botón Radio Garden -->
+                <a-entity position="0 -0.5 0.02" class="clickable" clickable data-overlay="radioOverlay">
+                    <a-box color="#00AA55" width="1.5" height="0.3" depth="0.05" opacity="0.9">
+                        <a-animation attribute="opacity" from="0.7" to="1" dur="1800" repeat="indefinite"></a-animation>
+                    </a-box>
+                    <a-text value="COMODORO RIVADAVIA" color="#ffffff" width="1.5" align="center"
+                        position="0 0 0.03"></a-text>
+                </a-entity>
+
+                <a-box width="2" height="0.1" depth="0.05" position="0 2 0"
+                    material="color: #858585; metalness: 0.8; roughness: 0.2"></a-box>
+                <a-box width="2" height="0.1" depth="0.05" position="0 -2 0"
+                    material="color: #858585; metalness: 0.8; roughness: 0.2"></a-box>
+            </a-plane>
+        </a-entity>
+
+        <!-- 5 -->
+        <a-entity position="-8 3 6" rotation="0 90 0" look-at-camera>
+            <a-plane width="2" height="4" material="color: #0563f0; opacity: 0.2; metalness: 1; roughness: 0.2">
+                <a-entity position="0 0 0.01" text="value: YouTube; color: cyan; align: center; width: 2"></a-entity>
+
+                <!-- Botón YouTube -->
+                <a-entity position="0 -0.5 0.02" class="clickable" clickable data-overlay="youtubeOverlay">
+                    <a-box color="#FF0000" width="1.5" height="0.3" depth="0.05" opacity="0.9">
+                        <a-animation attribute="opacity" from="0.7" to="1" dur="1800" repeat="indefinite"></a-animation>
+                    </a-box>
+                    <a-text value="ABRIR YOUTUBE" color="#ffffff" width="1.5" align="center"
+                        position="0 0 0.03"></a-text>
+                </a-entity>
+
+                <a-box width="2" height="0.1" depth="0.05" position="0 2 0"
+                    material="color: #858585; metalness: 0.8; roughness: 0.2"></a-box>
+                <a-box width="2" height="0.1" depth="0.05" position="0 -2 0"
+                    material="color: #858585; metalness: 0.8; roughness: 0.2"></a-box>
+            </a-plane>
+        </a-entity>
+
+        <!-- 6 -->
+        <a-entity position="8 3 -6" rotation="0 -90 0" look-at-camera>
+            <a-plane width="2" height="4" material="color: #0563f0; opacity: 0.2; metalness: 1; roughness: 0.2">
+                <a-entity position="0 0 0.01" text="value: Google; color: cyan; align: center; width: 2"></a-entity>
 
                 <!-- Botón Google -->
                 <a-entity position="0 -0.5 0.02" class="clickable" clickable data-overlay="googleOverlay">
-                  <a-box color="#f0b505" width="1.5" height="0.3" depth="0.05" opacity="0.9">
-                    <a-animation attribute="opacity" from="0.7" to="1" dur="1800" repeat="indefinite"></a-animation>
-                  </a-box>
-                  <a-text value="ABRIR GOOGLE" color="#ffffff" width="1.5" align="center" position="0 0 0.03"></a-text>
+                    <a-box color="#f0b505" width="1.5" height="0.3" depth="0.05" opacity="0.9">
+                        <a-animation attribute="opacity" from="0.7" to="1" dur="1800" repeat="indefinite"></a-animation>
+                    </a-box>
+                    <a-text value="ABRIR GOOGLE" color="#ffffff" width="1.5" align="center"
+                        position="0 0 0.03"></a-text>
                 </a-entity>
 
-        <a-box width="2" height="0.1" depth="0.05" position="0 2 0"
-          material="color: #858585; metalness: 0.8; roughness: 0.2"></a-box>
-        <a-box width="2" height="0.1" depth="0.05" position="0 -2 0"
-          material="color: #858585; metalness: 0.8; roughness: 0.2"></a-box>
-      </a-plane>
-    </a-entity>
+                <a-box width="2" height="0.1" depth="0.05" position="0 2 0"
+                    material="color: #858585; metalness: 0.8; roughness: 0.2"></a-box>
+                <a-box width="2" height="0.1" depth="0.05" position="0 -2 0"
+                    material="color: #858585; metalness: 0.8; roughness: 0.2"></a-box>
+            </a-plane>
+        </a-entity>
 
-    <!-- 7 -->
-    <a-entity position="8 3 -3" rotation="0 -90 0" look-at-camera>
-      <a-plane width="2" height="4" material="color: #0563f0; opacity: 0.2; metalness: 1; roughness: 0.2" weather-display>
-        <a-entity position="0 0 0.01" text="value: Cargando clima...; color: cyan; align: center; width: 2"></a-entity>
-        <a-box width="2" height="0.1" depth="0.05" position="0 2 0"
-          material="color: #858585; metalness: 0.8; roughness: 0.2"></a-box>
-        <a-box width="2" height="0.1" depth="0.05" position="0 -2 0"
-          material="color: #858585; metalness: 0.8; roughness: 0.2"></a-box>
-      </a-plane>
-    </a-entity>
+        <!-- 7 -->
+        <a-entity position="8 3 -3" rotation="0 -90 0" look-at-camera>
+            <a-plane width="2" height="4" material="color: #0563f0; opacity: 0.2; metalness: 1; roughness: 0.2"
+                weather-display>
+                <a-entity position="0 0 0.01"
+                    text="value: Cargando clima...; color: cyan; align: center; width: 2"></a-entity>
+                <a-box width="2" height="0.1" depth="0.05" position="0 2 0"
+                    material="color: #858585; metalness: 0.8; roughness: 0.2"></a-box>
+                <a-box width="2" height="0.1" depth="0.05" position="0 -2 0"
+                    material="color: #858585; metalness: 0.8; roughness: 0.2"></a-box>
+            </a-plane>
+        </a-entity>
 
-    <!-- 8 -->
-    <a-entity position="8 3 0" rotation="0 -90 0" look-at-camera>
-      <a-plane width="2" height="4" material="color: #0563f0; opacity: 0.2; metalness: 1; roughness: 0.2">
-        <a-entity position="0 0 0.01" text="value: Screen 8\nStandby; color: cyan; align: center; width: 2"></a-entity>
-        <a-box width="2" height="0.1" depth="0.05" position="0 2 0"
-          material="color: #858585; metalness: 0.8; roughness: 0.2"></a-box>
-        <a-box width="2" height="0.1" depth="0.05" position="0 -2 0"
-          material="color: #858585; metalness: 0.8; roughness: 0.2"></a-box>
-      </a-plane>
-    </a-entity>
+        <!-- 8 -->
+        <a-entity position="8 3 0" rotation="0 -90 0" look-at-camera>
+            <a-plane width="2" height="4" material="color: #0563f0; opacity: 0.2; metalness: 1; roughness: 0.2">
+                <a-entity position="0 0 0.01"
+                    text="value: Screen 8\nStandby; color: cyan; align: center; width: 2"></a-entity>
+                <a-box width="2" height="0.1" depth="0.05" position="0 2 0"
+                    material="color: #858585; metalness: 0.8; roughness: 0.2"></a-box>
+                <a-box width="2" height="0.1" depth="0.05" position="0 -2 0"
+                    material="color: #858585; metalness: 0.8; roughness: 0.2"></a-box>
+            </a-plane>
+        </a-entity>
 
-    <!-- 9 -->
-    <a-entity position="8 3 3" rotation="0 -90 0" look-at-camera>
-      <a-plane width="2" height="4" material="color: #0563f0; opacity: 0.2; metalness: 1; roughness: 0.2">
-        <a-entity position="0 0 0.01" text="value: Screen 9\nStandby; color: cyan; align: center; width: 2"></a-entity>
-        <a-box width="2" height="0.1" depth="0.05" position="0 2 0"
-          material="color: #858585; metalness: 0.8; roughness: 0.2"></a-box>
-        <a-box width="2" height="0.1" depth="0.05" position="0 -2 0"
-          material="color: #858585; metalness: 0.8; roughness: 0.2"></a-box>
-      </a-plane>
-    </a-entity>
+        <!-- 9 -->
+        <a-entity position="8 3 3" rotation="0 -90 0" look-at-camera>
+            <a-plane width="2" height="4" material="color: #0563f0; opacity: 0.2; metalness: 1; roughness: 0.2">
+                <a-entity position="0 0 0.01"
+                    text="value: Screen 9\nStandby; color: cyan; align: center; width: 2"></a-entity>
+                <a-box width="2" height="0.1" depth="0.05" position="0 2 0"
+                    material="color: #858585; metalness: 0.8; roughness: 0.2"></a-box>
+                <a-box width="2" height="0.1" depth="0.05" position="0 -2 0"
+                    material="color: #858585; metalness: 0.8; roughness: 0.2"></a-box>
+            </a-plane>
+        </a-entity>
 
-    <!-- 10 -->
-    <a-entity position="8 3 6" rotation="0 -90 0" look-at-camera>
-      <a-plane width="2" height="4" material="color: #0563f0; opacity: 0.2; metalness: 1; roughness: 0.2">
-        <a-entity position="0 0 0.01" text="value: Screen 10\nStandby; color: cyan; align: center; width: 2"></a-entity>
-        <a-box width="2" height="0.1" depth="0.05" position="0 2 0"
-          material="color: #858585; metalness: 0.8; roughness: 0.2"></a-box>
-        <a-box width="2" height="0.1" depth="0.05" position="0 -2 0"
-          material="color: #858585; metalness: 0.8; roughness: 0.2"></a-box>
-      </a-plane>
-    </a-entity>
-  </a-scene>
+        <!-- 10 -->
+        <a-entity position="8 3 6" rotation="0 -90 0" look-at-camera>
+            <a-plane width="2" height="4" material="color: #0563f0; opacity: 0.2; metalness: 1; roughness: 0.2">
+                <a-entity position="0 0 0.01"
+                    text="value: Screen 10\nStandby; color: cyan; align: center; width: 2"></a-entity>
+                <a-box width="2" height="0.1" depth="0.05" position="0 2 0"
+                    material="color: #858585; metalness: 0.8; roughness: 0.2"></a-box>
+                <a-box width="2" height="0.1" depth="0.05" position="0 -2 0"
+                    material="color: #858585; metalness: 0.8; roughness: 0.2"></a-box>
+            </a-plane>
+        </a-entity>
+
+
+        <!-- luces -->
+        <!-- <a-light type="ambient" color="#fff5ab" intensity="0.1"></a-light> -->
+        <!-- <a-light type="directional" color="#fff5ab" intensity="0.1" position="0.02 0.02 0.02"></a-light> -->
+
+        <!--     <a-light type="spot" color="#00ff00" position="0.04 0.06 0" angle="45" penumbra="0.2" target="#target-object"
+      light-flicker="minIntensity: 0.7; maxIntensity: 0.9; speed: 0.01">
+      <a-entity light-helper="type: spot"></a-entity>
+    </a-light> -->
+
+        <!-- Luz interior -->
+
+        <!--         <a-light type="spot" color="#ffdb9d" intensity="0.7" position="0.3 1.63 -0.63" angle="360" penumbra="0.3"
+            distance="1" decay="1" cast-shadow="true"
+            shadow="mapSize: 1024; bias: -0.0001; camera-near: 0.01; camera-far: 0.2">
+            <a-sphere radius="0.0025" color="#ffdb9d" material="emissive: #fff6dd; emissiveIntensity: 1.5"></a-sphere>
+        </a-light> -->
+
+        <!--         <a-light type="spot" color="#ffdb9d" intensity="0.7" position="0.12 1.63 -0.63" angle="360" penumbra="0.3"
+            distance="1" decay="1" cast-shadow="true"
+            shadow="mapSize: 1024; bias: -0.0001; camera-near: 0.01; camera-far: 0.2">
+            <a-sphere radius="0.0025" color="#ffdb9d" material="emissive: #fff6dd; emissiveIntensity: 1.5"></a-sphere>
+        </a-light> -->
+
+        <!--         <a-light type="spot" color="#ffdb9d" intensity="0.7" position="-0.07 1.665 -0.8" angle="360" penumbra="0.3"
+            distance="1" decay="1" cast-shadow="true"
+            shadow="mapSize: 1024; bias: -0.0001; camera-near: 0.01; camera-far: 0.2">
+            <a-sphere radius="0.0025" color="#ffdb9d" material="emissive: #fff6dd; emissiveIntensity: 1.5"></a-sphere>
+        </a-light> -->
+
+        <!-- Luz exterior -->
+
+        <!--     <a-light type="spot" color="#ffdb9d" intensity="0.7" position="0.1 1.55 -0" angle="360" penumbra="0.3" distance="1"
+      decay="1" cast-shadow="true" shadow="mapSize: 1024; bias: -0.0001; camera-near: 0.01; camera-far: 0.2">
+      <a-sphere radius="0.0025" color="#ffdb9d" material="emissive: #fff6dd; emissiveIntensity: 1.5"></a-sphere>
+      <a-entity
+        sound="src: url(sound/sound/forest-ambience-296528.mp3); autoplay: true; loop: true; volume: 0.5; rolloffFactor: 3; maxDistance: 5; refDistance: 1;"></a-entity>
+    </a-light> -->
+
+        <!--     <a-light type="spot" color="#ffdb9d" intensity="0.7" position="-0.1 1.555 -0" angle="360" penumbra="0.3"
+      distance="1" decay="1" cast-shadow="true"
+      shadow="mapSize: 1024; bias: -0.0001; camera-near: 0.01; camera-far: 0.2">
+      <a-sphere radius="0.0025" color="#ffdb9d" material="emissive: #fff6dd; emissiveIntensity: 1.5"></a-sphere>
+    </a-light> -->
+
+        <!--     <a-light type="spot" color="#ffdb9d" intensity="0.7" position="0.041 1.665 -1.33" angle="360" penumbra="0.3"
+      distance="1" decay="1" cast-shadow="true"
+      shadow="mapSize: 1024; bias: -0.0001; camera-near: 0.01; camera-far: 0.2">
+      <a-sphere radius="0.0025" color="#ffdb9d" material="emissive: #fff6dd; emissiveIntensity: 1.5"></a-sphere>
+    </a-light> -->
+    </a-scene>
 </body>
 
 </html>
