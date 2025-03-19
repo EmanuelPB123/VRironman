@@ -1,7 +1,7 @@
 <html>
 
 <head>
-    <title>VR Chalet Huergo Official</title>
+    <title></title>
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/nipplejs/0.10.1/nipplejs.min.js"></script>
@@ -11,7 +11,9 @@
     <script src="js/linterna.js"></script>
     <script src="clima.js"></script>
     <script src="script.js"></script>
+    <script type="module" src="flight-controls.js"></script>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles2.css">
 </head>
 
 <body>
@@ -60,7 +62,21 @@
             <a-sphere radius="0.1" color="#ffdb9d" material="emissive: #fff6dd; emissiveIntensity: 1.5"></a-sphere>
         </a-light>
 
-
+        <!-- Add flight mode button -->
+        <a-entity position="0 2.5 -8">
+            <a-cylinder id="flight-button" radius="0.15" height="0.1"
+                material="color: #ff4400; metalness: 0.8; roughness: 0.2" flight-button
+                animation__hover="property: position; dir: alternate; dur: 1000; easing: easeInOutSine; loop: true; to: 0 0.1 0"
+                look-at-camera>
+                <a-text value="FLIGHT MODE" align="center" position="0 0.4 0.06" scale="0.5 0.5 0.5" color="#FFD700"
+                    side="double">
+                </a-text>
+                <a-ring position="0 0.06 0" radius-inner="0.16" radius-outer="0.18"
+                    material="color: #FFD700; metalness: 0.8; roughness: 0.2"
+                    animation="property: rotation; to: 0 360 0; loop: true; dur: 4000; easing: linear">
+                </a-ring>
+            </a-cylinder>
+        </a-entity>
         <!-- Cielo -->
         <a-sky color="#000000"></a-sky>
         <!-- <a-plane position="0 0 0" rotation="-90 0 0" width="2.5" height="2.4" material="color: #7BC8A4; roughness: 0.8; metalness: 0.2"></a-plane> -->
@@ -92,7 +108,7 @@
       material="color: #ff5500; opacity: 0.9; roughness: 0.1; metalness: 0.1"></a-box> -->
 
         <!-- edificio -->
-        <a-entity position="-32 -2.9 -58" scale="1 1 1" gltf-model="untitled.glb" shadow="cast: true; receive: false">
+        <a-entity position="-32 -2.9 -58" scale="1 1 1" gltf-model="1.glb" shadow="cast: true; receive: false">
         </a-entity>
 
         <!-- sound -->
@@ -105,7 +121,9 @@
     <a-text value="SALIDA" position="0.02 1.7 -0.08" color="#ffffff" scale="0.06 0.06 0.06" rotation="0 180"></a-text>
     <a-text value="Restricted Area" position="0.19 1.63 -0.62" color="#FF0000" scale="0.02 0.02 0.02"></a-text>
  -->
-        <a-entity position="0 1.6 0">
+
+ <!-- camara -->
+  <a-entity id="rig" position="0 1.6 0" flight-controls>
             <a-camera look-controls>
                 <a-cursor color="#ff1e00" fuse="true" fuseTimeout="1500"></a-cursor>
                 <!-- linterna -->
